@@ -39,13 +39,80 @@ public class profile extends HttpServlet {
 		Cluster cluster = Cluster.builder().addContactPoint("localhost").build();
 		Session session = cluster.connect("ecommerce");
 		
-		HttpSession ses = request.getSession(false);
-		if(null != ses.getAttribute("user-login-email")){
+		HttpSession ses = request.getSession(true);
+		if(null == ses.getAttribute("user-login-email")){
+			response.sendRedirect("http://localhost:8080/ecommerce/index.jsp");
+		}else{
 			String mail = ses.getAttribute("user-login-email").toString();
 			
 			String res_data = "select * from user where email ='"+mail+"'";
 
 			ResultSet result = session.execute(res_data);
+			
+			//check social media connection
+			
+			String social_media_post = "";
+			
+			String data1 = "select count(*) from social_connect where email = '"+mail+"'";
+			ResultSet con = session.execute(data1);
+			
+			Row con1 = con.one();
+			long one = con1.getLong("count");
+			ResultSet con_re;
+			boolean status;
+			
+			if(one>0){
+				status = true;
+				String data2 = "select * from social_connect where email = '"+mail+"'";
+				//getting result about user like
+				
+				con_re = session.execute(data2);
+				Row ids = con_re.one();
+				
+				String ids_one = ids.getString("id");
+				
+				String query3 = "select * from social_like where user_id='"+ids_one+"' ALLOW FILTERING";
+				ResultSet link;
+				ResultSet likes = session.execute(query3);
+				int iid =0 ;
+				while(!likes.isExhausted()){
+					Row like = likes.one();
+					String media_post_id = like.getString("media_post_id");
+					
+					String query4 = "select product_id from post_link where media_post_id='"+media_post_id+"'";
+					
+					link = session.execute(query4);
+					while(!link.isExhausted()){
+						
+					Row link_ne = link.one();
+					
+					iid = link_ne.getInt("product_id");
+					
+					String query5 = "select * from product where id="+iid + " ALLOW FILTERING";
+					
+					ResultSet offline = session.execute(query5);
+					
+					Row off = offline.one();
+					
+
+					int social_price = off.getInt("price");
+					int social_old_price = social_price+social_price*off.getInt("discount")/100;
+					String social_product = off.getString("title");
+					int social_id = off.getInt("id");
+					String social_img_loc = off.getString("img");
+					
+					social_media_post += "<div  onclick=item_popup("+social_id+") style='background-color:#F7F7F7;width:249px;height:282px;float:left;box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16);margin-left:12px;margin-top:10px;position:relative;cursor:pointer'><div style='padding:4px;'><div style='width:100%;height:auto;float:left'><div style='width:100%;text-align:center;height:200px'><img src='"+social_img_loc+"' style='max-width:210px;max-height:220px' /></div><div style='font-size:14px;color:#333333;border-bottom:1px solid green;width:100%;float:left;margin-top:21px'>"+social_product+"</div><div style='width:100%;float:left'><div style='width:40%;float:left'>&#8377;"+social_price+"</div><div style='width:40%;float:left'><span style='text-decoration:line-through'>&#8377;"+social_old_price+"</span></div></div></div></div></div>";
+				
+					
+					}
+					
+					
+					}
+				
+			}else{
+				status = false;
+			}
+			
 			
 			Row one_row = result.one();
 			
@@ -65,7 +132,7 @@ public class profile extends HttpServlet {
 			String prev_amount = "";
 			
 			if(count>0){
-				String prev_prod = "select product_id from user_action where user_email='"+mail+"' limit 10";
+				String prev_prod = "select product_id from user_deaction where user_email='"+mail+"' limit 10";
 				ResultSet prev = session.execute(prev_prod);
 				
 				while(!prev.isExhausted()){
@@ -90,9 +157,11 @@ public class profile extends HttpServlet {
 					
 					String gender = new_row.getString("gender");
 					
+					String cat = new_row.getString("cat");
+					
 					String dfs_query = "select * from product where gender='"+gender+"' and dfs_list ="+dfs+" limit 3 allow filtering";
 					
-					String bfs_query = "select * from product where gender='"+gender+"' and bfs_list ="+bfs+" limit 5 allow filtering";
+					String bfs_query = "select * from product where gender='"+gender+"' and bfs_list ="+bfs+" and cat='"+cat+"' limit 5 allow filtering";
 					
 					ResultSet dfs_product = session.execute(dfs_query);
 					ResultSet bfs_product = session.execute(bfs_query);
@@ -132,6 +201,8 @@ public class profile extends HttpServlet {
 				}
 				
 			}
+			//get user_social media connection
+			
 			//display popular product;
 			String trend_product = "select * from product_history where location = "+ location+" limit 30";
 			
@@ -209,12 +280,13 @@ public class profile extends HttpServlet {
 																	+"<img src='/ecommerce/images/bird.ico' style='width:32px;height:32px;' />"
 																+"</div>"
 																+"<div style='text-align:center'>"
-																	+name.substring(0, 6)
+																	+name.substring(0,6)
 																+"</div>"
 																+"<div id='logout_display' style='display:none'>"
-																+"<div style='position:absolute;background-color:rgb(228,247,247);padding:6px;margin-left:-16px;margin-top:2px'>"
+																
+																+"<div style='position:absolute;background-color:rgb(228,247,247);padding:6px;margin-left:-16px;margin-top:2px'><a href='http://localhost:8080/ecommerce/logout'>"
 																	+ "LogOut"
-																+ "</div>"
+																+ "</a></div>"
 																+ "</div>"
 																
 															+"</div>"
@@ -252,30 +324,51 @@ public class profile extends HttpServlet {
 																	+"</tr>"
 																+"</table>"
 															+"</div>"
-															+"<div style='width:95%;float:left;height:auto;position:relative'>"
+															+"<div style='width:95%;float:left;height:auto;position:relative;margin-top:10px'>"
 																+"<h3>Today's Offer</h3>"
 																+"<div style='width:90%;background-color:rgb(237, 237, 237);box-shadow:0 2px 2px 0 rgba(0,0,0,0.16);margin-top:3px;height:244px'>"
 																	
 																+"</div>"
 															+"</div>"
-															+"<div style='width:95%;float:left;height:auto;position:relative'>"
-																+"<h3>More Categories</h3>"
+															+"<div style='width:95%;float:left;height:auto;position:relative;margin-top:10px'>"
+																+"<h3>Social Media Connection</h3>"
 																+"<div style='width:90%;background-color:rgb(237, 237, 237);margin-top:3px;height:244px'>"
+																+ "<div style='width:90%;float:left;padding:5px;'>"
+																+ "<table style='width:100%;cursor:pointer'><tr><td><img src='images/facebook.png' style='width:35px;height:35px;border-radius:50%' /></td><td>");
+																if(status){ 
+																	//connected
+																	out.println("<div style='font-size:14px'><strong>Connected</strong></div>");
+																}else{ 
+																	//not connectd
+																	out.println("<div onclick=get_facebook_id() style='font-size:12px'><strong>Click To Connect</strong></div>");
+																}
+																out.println("</td></tr></table>"
+																+"</div>"
 																	
 																+"</div>"
 															+"</div>"
-														+"</div>"
-														+"<div style='width:85%;float:left;margin-left:15%;' id='display_result'>");
-														if(prev_amount != ""){
-														out.print("<h1>Previously Watched</h1>"
+														+"</div>");
+														
+														if(prev_amount.length() > 20){
+															out.print("<div style='width:85%;float:left;margin-left:15%;' id='display_result'>"
+															+"<h1>Previously Watched</h1>"
 															+ "<div style='width:100%;float:left;margin-top:20px;border:10px solid rgb(237,237,237);padding-bottom:10px'>"
 															+prev_amount
 															+"</div>"
 															+"</div><div style='margin-left:15%;margin-top:-2px;'><img src='/ecommerce/images/shadow_bottom.png' style='width:100%;' /></div>");
 														}
+														if(status && social_media_post.length() > 20){
+															out.print("<div style='width:85%;float:left;margin-left:15%;' id='display_result'>"
+																+"<h1>Based On Facebook Likes On Our Facebook Page</h1>"
+																+ "<div style='width:100%;float:left;margin-top:20px;border:10px solid rgb(237,237,237);padding-bottom:10px'>"
+																+social_media_post
+																+"</div>"
+																+"</div><div style='margin-left:15%;margin-top:-2px;'><img src='/ecommerce/images/shadow_bottom.png' style='width:100%;' /></div>");
+															}
 														
+														
+														if(dfs_pro.length()> 20 || bfs_pro.length()> 02){
 														out.println("<div style='width:85%;float:left;margin-left:15%;' id='display_result'>");
-														if(dfs_pro != "" || bfs_pro != ""){
 														out.print("<h1>Related To Previous Experience</h1>"
 															+ "<div style='width:100%;float:left;margin-top:20px;border:10px solid rgb(237,237,237);padding-bottom:10px'>"
 															+bfs_pro+dfs_pro
@@ -283,9 +376,10 @@ public class profile extends HttpServlet {
 															+"</div><div style='margin-left:15%;margin-top:-2px;'><img src='/ecommerce/images/shadow_bottom.png' style='width:100%;' /></div>");
 														
 														}
+
 														
-														out.print("<div style='width:85%;float:left;margin-left:15%;' id='display_result'>");
 														if(location_trend != null){
+															out.print("<div style='width:85%;float:left;margin-left:15%;' id='display_result'>");
 															out.print("<h1>Based On Your Location Trending</h1>"
 															+ "<div style='width:100%;float:left;margin-top:20px;border:10px solid rgb(237,237,237);padding-bottom:10px'>"
 															+location_trend
@@ -304,17 +398,16 @@ public class profile extends HttpServlet {
 												+"<div id='product_box'></div>"
 											+"</div>"
 										+"</div>"
+										+ "<div title='click to close' onclick= close_it('product_display')><img src='images/close.png' style='width:35px;height:35px;border-radius:50%;cursor:pointer;margin-top: -18px;margin-left: -18px;' /></div>"
 									+"</div>"
-									+"<footer></footer>"
+									+"<div id='show_get_id' style='width:100%;height:100%;position:fixed;z-index:2500;display:none;' id='login_box'><div style='width:250px;margin:0 auto'><div style='width:100%;float:left;;margin-top:130px;border:1px solid rgba(228,10,70,0.78);padding:10px;background-color:rgb(247,247,247);border-radius:4px;'><div style='width:100%;float:left;font-size:24px'>Facebook Id</div><div style='width:100%;float:left;font-size:14px;text-align:right'><a href='https://developers.facebook.com/tools/explorer/' target='_blank'>Click here to get Facebook Id</a></div><div style='width:100%;float:left;margin-top:10px;'><input type='text' id='facebook_id' style='width:100%;float:left;padding:9px;outline:none;border:none;border-radius:2px;' placeholder='Facebook Id' /></div><div style='width:100%;float:left;margin-top:10px'><div style='width:50%;margin:0 auto;'><div style='width:100%;float:left;' onclick=get_id()><button style='width:100%;float:left;border:none;padding:9px;cursor:pointer;'>Submit</button></div></div></div></div></div><div title='click to close' onclick= close_it('show_get_id')><img src='images/close.png' style='width:35px;height:35px;border-radius:50%;cursor:pointer;margin-top: 111px;margin-left: -18px;' /></div></div>"
+									+"<footer>"
+									+ "</footer>"
 									+"</div>"
 								+"</div>"
 							+"</div>"
 						+"</body>"
 					+"</html>");
-		}else{
-			response.sendRedirect("http://localhost:8080/ecommerce/index.jsp");
-		}
-		
+		}	
 	}
-
 }

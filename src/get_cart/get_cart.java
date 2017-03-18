@@ -73,7 +73,7 @@ public class get_cart extends HttpServlet {
 					
 					out.println("<div id='remove"+id+"' style='border:1px solid grey;margin-top:5px;padding:3px;border-radius:3px;'><table><tr><td rowspan='2'><img src='"+img+"' style='width:46px;height:auto;'</td><td colspan='2'  style='font-size:12px'>"+title.substring(0, 20)+"...</td</tr><tr><td  style='font-size:12px'>"+price+"</td><td><a style='color:blue;cursor:pointer' onclick=delete_me("+id+")>Remove</a></td></tr></table></div>");
 				}
-				out.println("<div style='color:blue'>Go To Your Cart</div>");
+				out.println("<div style='color:blue'><a href='http://localhost:8080/ecommerce/cart'>Go To Your Cart</a></div>");
 			}
 		}
 		

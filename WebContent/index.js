@@ -1,4 +1,3 @@
-//var location=1;
 function get_search_data(){
 	var q = document.getElementById("q").value;
 	if(q != ""){
@@ -19,6 +18,7 @@ function get_search_data(){
 			if(se_jx.status == 200 && se_jx.readyState == 4){
 				
 				document.getElementById("display_result").innerHTML = se_jx.responseText;
+				window.scrollTo(0, 0);
 				
 			}
 		};
@@ -60,9 +60,15 @@ function allow_login(){
 		
 		s_jx.onreadystatechange = function(){
 			if(s_jx.readyState == 4 && s_jx.status == 200){
-				if(s_jx.responseText == "Successful"){
-					window.location.href = "/ecommerce/profile";
+				if(s_jx.responseText.trim() == "Successful"){
+					window.location = "http://localhost:8080/ecommerce/profile";
+				}else{
+					$("#login_error").show();
+					document.getElementById("login_error").innerHTML = s_jx.responseText;
 				}
+			}else{
+				$("#login_error").show();
+				document.getElementById("login_error").innerHTML = s_jx.responseText;
 			}
 		};
 		s_jx.send(param);
@@ -115,9 +121,10 @@ function allow_signup(){
 		error_list = error_list + "\nPassword donot match";
 	}
 
-	if(error_list == "error_list"){
+	if(error_list.trim() == "error_list"){
 		parameter = "name="+name+"&email="+mail+"&passcode="+pass1+"&year="+year+"&date="+date+"&month="+month+"&gender="+genValue+"&verify=signup";
 		var sign_jx;
+
 		
 		if(window.XMLHttpRequest){
 			sign_jx = new XMLHttpRequest();
@@ -135,17 +142,21 @@ function allow_signup(){
 		sign_jx.onreadystatechange = function(){
 			if(sign_jx.readyState == 4 && sign_jx.status == 200){
 				
-				if(sign_jx.responseText == "Successful"){
-					window.location.href = "/ecommerce/profile";
+				if(sign_jx.responseText.trim() == "Successful"){
+					window.location = "http://localhost:8080/ecommerce/profile";
 				}else{
-					document.getElementById("signup_error").style.display = "block";
-					document.getElementById("signup_error").innerHTML = sign_jx.responseText;
+					$("#signup_error").show();
+					document.getElementById("login_error").innerHTML = sign_jx.responseText;
 				}
+			}else{
+				$("#signup_error").show();
+				document.getElementById("signup_error").innerHTML = sign_jx.responseText;
 			}
 		};
 		sign_jx.send(parameter);
 	}else{
-		alert("Nothing Can Be Done");
+		$("#signup_error").show();
+		document.getElementById("signup_error").innerHTML = error_list;
 	}
 }
 
@@ -157,12 +168,10 @@ function get_trending(){
 	}else{
 		trend_jx = new ActiveXObject("Microsoft.XMLHTTP");
 	}
-
-	var location = 1;
-	trend_jx.open("GET", "/ecommerce/trend?location="+location, true);
+	
+	trend_jx.open("GET", "/ecommerce/trend?location="+2, true);
 	
 	trend_jx.onreadystatechange = function(){
-		
 		if(trend_jx.status == 200 && trend_jx.readyState == 4){
 			
 			document.getElementById("display_trending").innerHTML = trend_jx.responseText;
@@ -293,6 +302,24 @@ function delete_me(ids){
 	delete_jx1.send();
 	get_num();
 }
+function delete_me1(ids){
+	var delete_jx1;
+	if(window.XMLHttpRequest){
+		delete_jx1 = new XMLHttpRequest();
+	}else{
+		delete_jx1 = new ActiveXObject('Microsoft.XMLHTTP');
+	}
+	
+	delete_jx1.open("GET", "/ecommerce/delete?value="+ids, false);
+	
+	delete_jx1.onreadystatechange = function(){
+		if(delete_jx1.readyState == 4 && delete_jx1.status == 200){
+			window.location = "http://localhost:8080/ecommerce/cart";
+		}
+	};
+	delete_jx1.send();
+	get_num();
+}
 
 function show_id_cart(){
 	if(document.getElementById("show_cart").style.display == "none"){
@@ -303,4 +330,50 @@ function show_id_cart(){
 		document.getElementById("show_cart").style.display = "none";
 		document.getElementById("_click").style.backgroundColor = "rgba(228,247,247,0.2)";
 	}
+}
+
+function get_facebook_id(){
+	//get_active+show_get_id
+	if(document.getElementById("show_get_id").style.display == "none"){
+		$("#get_active").show();
+		$("#show_get_id").show();
+	}else{
+		$("#get_active").hide();
+		$("#show_get_id").hide();
+	}
+}
+
+function get_id(){
+	var facebook_jx;
+	if(window.XMLHttpRequest){
+		facebook_jx = new XMLHttpRequest();
+	}else{
+		facebook_jx = new ActiveXObject('Microsoft.XMLHTTP');
+	}
+	var id = document.getElementById("facebook_id").value;
+	param = "facebook_id="+id;
+	
+	facebook_jx.open("POST", "/ecommerce/get_facebook_id", false);
+	
+	facebook_jx.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	facebook_jx.setRequestHeader("Content-length", param.length);
+	facebook_jx.setRequestHeader("Connetion", "close");
+
+	facebook_jx.onreadystatechange = function(){
+		if(facebook_jx.readyState == 4 && facebook_jx.status == 200){
+			if(facebook_jx.responseText.trim() == "Suceeded"){
+				window.location = "http://localhost:8080/ecommerce/profile";
+			}else{
+				alert("Try Again");
+			}
+		}else{
+			alert("Try Again");
+		}
+	};
+	facebook_jx.send(param);
+}
+
+function close_it(id){
+	$("#get_active").hide(200);
+	$("#"+id).hide(300);
 }

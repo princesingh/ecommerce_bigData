@@ -69,10 +69,12 @@ public class product extends HttpServlet {
 		}else{
 			
 			Date dNow = new Date( );
-		    SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd");
+		    SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
 		    
 			String query2 = "insert into user_action (product_id,user_email,date) values("+id+",'"+user_name+"','"+ft.format(dNow)+"')";
+			String query3 = "insert into user_deaction (product_id,user_email,date) values("+id+",'"+user_name+"','"+ft.format(dNow)+"')";
 			
+			session.execute(query3);
 			session.execute(query2);
 			//String d3 = "select * from product_history where location= 3 and product_id=2"
 			//if no 
@@ -94,17 +96,7 @@ public class product extends HttpServlet {
 		
 		String category = row.getString("cat");
 
-		String[] location_new = new String[10];
-		location_new[0] = "Sri Nagar";
-		location_new[1] = "Shimla";
-		location_new[2] = "Gadhi Nagar";
-		location_new[3] = "Bhopal";
-		location_new[4] = "Patna";
-		location_new[5] = "Imphal";
-		location_new[6] = "Mumbai";
-		location_new[7] = "Banglore";
-		location_new[8] = "Chennai";
-		location_new[9] = "Trivendrum";
+		String location_new[] = new String[]{"Sri Nagar","Shimla","Delhi","JaiPur","Gandhi Nagar","Mumbai","Bhopal","Raipur","Patna","Itanager","Imphal","Ranchi","Kolkata","Bhuvneshwar","Hyderabad","Banglore","Chennai","Kochi"};
 		
 		out.print("<div style='width:100%;float:left;position:relative'><div style='padding:10px'><div style='width:100%;float:left'><div style='width:400px;min-height:400px;float:left'><img src='"+img+"' style='max-width:400px;max-height:400px' /></div> <div style='width:300px;float:left;min-height:400px;'><div style='width:100%;float:left;font-size:20px;color:green'>"+title+"</div><hr><div style='width:100%;float:left;font-size:18px;margin-top:40px;color:#999'><div><div>Availabe At:-"+location_new[location]+" store</div><div>Product Category:-"+category+"</div></div></div><div style='width:100%;float:left;font-size:18px;margin-top:40px'><div style='width:48%;float:left;text-align:center'>New Price: &#8377;"+price+"</div><div style='width:48%;float:left;text-decoration:line-through;text-align:center'>Old Price: &#8377;"+discount+"</div></div><hr><div style='width:100%;float:left;text-align:center;margin-top:140px'><span style='border:3px solid green;padding:8px;cursor:pointer' id='cart_action' onclick=add_to_cart("+id+")>Add To Cart</span></div></div></div></div></div></div><hr><br>");
 		

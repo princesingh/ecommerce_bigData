@@ -182,7 +182,7 @@ if(null != ses.getAttribute("user-login-email")){
 					<div id="get_active" style="width:100%;height:100%;position:fixed;z-index:2000;background-color:rgba(247,247,247,0.65);display:none;" onclick=hide_all()></div>
 					
 					<!-- For Login --Send Data Using Given Parameter -->
-					<div style="width:100%;height:100%;position:absolute;z-index:2500;display:none;" id='login_box'>
+					<div style="width:100%;height:100%;position:fixed;z-index:2500;display:none;" id='login_box'>
 						<div style="width:250px;margin:0 auto">
 							<div style="width:100%;float:left;;margin-top:130px;border:1px solid rgba(228,10,70,0.78);padding:10px;background-color:rgb(247,247,247);border-radius:4px;">
 								<div style="width:100%;float:left;font-size:24px">
@@ -209,6 +209,7 @@ if(null != ses.getAttribute("user-login-email")){
 								</div>
 							</div>
 						</div>
+						<div title='click to close' onclick=close_it("login_box")><img src='images/close.png' style='width:35px;height:35px;border-radius:50%;cursor:pointer;margin-top: 111px;margin-left: -18px;' /></div>
 					</div>
 					
 					<!-- For SignUp --Send Data Using Given Parameter -->
@@ -247,10 +248,10 @@ if(null != ses.getAttribute("user-login-email")){
 								</div>
 								<div style="width:100%;float:left;">
 									<label style="width:25%;float:left;padding:9px;outline:none;border:1px solid rgba(228,10,70,0.5);border-radius:2px;">
-										<input type="radio" name="gender" id="gender" value="men" />Male
+										<input type="radio" name="gender" id="gender" value="male" />Male
 									</label>
 									<label style="width:25%;float:left;padding:9px;outline:none;border:1px solid rgba(228,10,70,0.5);border-radius:2px;">
-										<input type="radio" name="gender" id="gender" value="women" />Female
+										<input type="radio" name="gender" id="gender" value="female" />Female
 									</label>
 									<label style="width:25%;float:left;padding:9px;outline:none;border:1px solid rgba(228,10,70,0.5);border-radius:2px;">
 										<input type="radio" name="gender" id="gender" value="other" />Other
@@ -277,6 +278,7 @@ if(null != ses.getAttribute("user-login-email")){
 								</div>
 							</div>
 						</div>
+						<div title='click to close' onclick= close_it('signup_box')><img src='images/close.png' style='width:35px;height:35px;border-radius:50%;cursor:pointer;margin-top: 63px;margin-left: -18px;' /></div>
 					</div>
 					
 					<!-- Display Product -->
@@ -286,6 +288,7 @@ if(null != ses.getAttribute("user-login-email")){
 								<div id="product_box"></div>
 							</div>
 						</div>
+						<div title='click to close' onclick= close_it('product_display')><img src='images/close.png' style='width:35px;height:35px;border-radius:50%;cursor:pointer;margin-top: -18px;margin-left: -18px;' /></div>
 					</div>
 					<footer></footer>
 				</div>

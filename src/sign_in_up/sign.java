@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
 /**
@@ -52,13 +53,23 @@ public class sign extends HttpServlet {
 			String user_pass = request.getParameter("user_pass");
 			if(user_name.length() >= 6 && user_pass.length() >= 6){
 				
-				String login = "select password from user where email='"+user_name+"'";
+				String login = "select count(*) from user where email='"+user_name+"' limit 1";
+				
 				ResultSet result = session.execute(login);
-				if(result.one().getString("password").equals(user_pass)){
+				Row resultSet = result.one();
+				long count = resultSet.getLong("count");
+				if(count>0){
+					String login1 = "select password from user where email='"+user_name+"'";
 					
-					ses.setAttribute("user-login-email", user_name);
-					out.println("Successful");
-					
+					ResultSet result1 = session.execute(login1);
+					if(result1.one().getString("password").equals(user_pass)){
+						
+						ses.setAttribute("user-login-email", user_name);
+						out.println("Successful");
+						
+					}else{
+						out.println("ERROR: 103 Invalid Credential");
+					}
 				}else{
 					out.println("ERROR: 102 Invalid Credential");
 				}
@@ -84,7 +95,7 @@ public class sign extends HttpServlet {
 			
 			String gender = request.getParameter("gender");
 			
-			String user_query = "insert into user(name,email,gender,b_date,city,date_of_joining,password) values ('"+name+"','"+email+"','"+gender+"','"+b_date+"','kochi','"+date1+"','"+passcode+"')";
+			String user_query = "insert into user(name,email,gender,b_date,city,date_of_joining,password,location) values ('"+name+"','"+email+"','"+gender+"','"+b_date+"','kochi','"+date1+"','"+passcode+"',10)";
 			
 			session.execute(user_query);
 			ses.setAttribute("user-login-email", email);
