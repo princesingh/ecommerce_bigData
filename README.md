@@ -2,7 +2,7 @@
 eCommerce Using Cassandra DataBase (Eclipse Project)
 
 # Note
-I'm not supporting this project now, though I can provide support,Feel free to use this code.
+I'm not supporting this project now, Feel free to use this code.
 
 #Features
 1. Simple Login and Signup
